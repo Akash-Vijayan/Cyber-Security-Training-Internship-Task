@@ -1,0 +1,64 @@
+
+ARP-SCAN GUIDE – Kali Linux
+============================
+
+What is arp-scan?
+------------------
+`arp-scan` is a command-line tool used to discover live hosts on a local network.
+It uses the ARP (Address Resolution Protocol) to identify active devices by sending ARP requests and listing the replies.
+
+Why Use arp-scan?
+------------------
+- To quickly identify all devices connected to your LAN.
+- To detect unauthorized or unknown devices on your network.
+- Works even when ICMP (ping) is blocked, unlike traditional ping sweep tools.
+
+How It Works:
+--------------
+ARP works at the data link layer (Layer 2). `arp-scan` sends ARP packets to all IPs in a range and displays the ones that respond.
+
+Installation:
+-------------
+Usually pre-installed in Kali. If not:
+    sudo apt install arp-scan
+
+Basic Usage:
+------------
+1. Scan your local network:
+    sudo arp-scan --interface=eth0 192.168.1.0/24
+
+    Replace `eth0` with your network interface (check using `ip a`).
+    Replace `192.168.1.0/24` with your network subnet.
+
+2. Identify only known vendors/devices:
+    sudo arp-scan --localnet
+
+    (Uses pre-configured local subnet and interface)
+
+3. Save the results to a file:
+    sudo arp-scan --localnet > scan_results.txt
+
+Options:
+--------
+--interface=IFACE       : Specify the network interface.
+--localnet              : Use the local subnet for scanning.
+--ignoredups            : Ignore duplicate responses.
+--retry=X               : Number of times to retry unanswered hosts.
+
+Example:
+--------
+    sudo arp-scan --interface=wlan0 --localnet
+
+    Output will show:
+    - IP address
+    - MAC address
+    - Vendor name (if identified)
+
+Security Use Case:
+------------------
+Detect rogue devices on your Wi-Fi or LAN network, like hidden cameras, unauthorized phones, etc.
+
+Note:
+-----
+You need `sudo` or root privileges to run `arp-scan`.
+
