@@ -1,0 +1,74 @@
+
+What are copy-router-config and merge-router-config?
+---------------------------------------------------
+- **copy-router-config**: A process or script used to copy a router's configuration (usually the running-config) from the router to a server (like Kali) for backup.
+- **merge-router-config**: A process or script used to take a configuration file from the server and merge it into the router's running configuration.
+
+Why do we use them?
+-------------------
+- To create **backups** of router configurations (so we can restore if something breaks).
+- To **restore or update** router settings without typing everything manually.
+- Useful in **network administration** and **cybersecurity** for managing multiple devices.
+
+Setting up Kali Linux as a TFTP Server
+--------------------------------------
+1. Install TFTP server tools:
+   sudo apt install tftp-hpa tftpd-hpa
+
+2. Create a directory for TFTP files:
+   sudo mkdir -p /srv/tftp
+
+3. Give permissions:
+   sudo chmod 777 /srv/tftp
+
+4. Configure TFTP server:
+   Edit the file /etc/default/tftpd-hpa
+   Example:
+   ---------------------------------
+   TFTP_USERNAME="tftp"
+   TFTP_DIRECTORY="/srv/tftp"
+   TFTP_ADDRESS="0.0.0.0:69"
+   TFTP_OPTIONS="--secure"
+   ---------------------------------
+
+5. Restart the TFTP service:
+   sudo systemctl restart tftpd-hpa
+
+6. Check if it’s running:
+   sudo systemctl status tftpd-hpa
+
+How to Use with a Router (Cisco Example)
+----------------------------------------
+1. On the router, go to enable mode:
+   Router> enable
+
+2. Copy running configuration to TFTP:
+   Router# copy running-config tftp:
+   Address or name of remote host []? 10.0.2.15 (Kali's IP)
+   Destination filename [running-config]? router-backup.cfg
+
+3. To restore or merge config from TFTP to router:
+   Router# copy tftp: running-config
+   Address or name of remote host []? 10.0.2.15
+   Source filename []? router-backup.cfg
+
+Step-by-Step Example
+--------------------
+1. Setup Kali TFTP server as above.
+2. Get Kali’s IP using:
+   ip addr show
+3. On router, copy config to Kali’s IP.
+4. Check Kali's /srv/tftp directory — file should appear there.
+5. Modify config file if needed, then merge it back.
+
+Expected Outputs
+----------------
+- When copying from router to TFTP: "Copy complete" on router console.
+- When copying from TFTP to router: "Merge complete" or configuration updates apply instantly.
+
+Real-World Example for Team Demo
+--------------------------------
+- Backup router config before making changes.
+- Make a change on router (like hostname).
+- Restore old config from backup to revert changes instantly.
+
