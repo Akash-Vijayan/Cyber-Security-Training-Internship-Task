@@ -1,0 +1,99 @@
+✅ Acknowledgement: DNSRecon – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/dnsrecon
+
+------------------------------------------------------------------------
+
+1) What is DNSRecon?
+
+DNSRecon is a powerful DNS enumeration tool used to perform
+reconnaissance on DNS records of a target domain.
+It automates the process of gathering DNS information, checking zone
+transfers, brute-forcing subdomains, and more.
+
+------------------------------------------------------------------------
+
+2) Why use DNSRecon?
+
+-   Collects comprehensive DNS record types (A, MX, NS, TXT, SOA, etc.).
+-   Detects misconfigured DNS servers (e.g., zone transfer
+    vulnerabilities).
+-   Performs subdomain brute-forcing and reverse lookups.
+-   Helps in penetration testing and security assessments.
+
+------------------------------------------------------------------------
+
+3) How does DNSRecon work?
+
+1.  You provide a domain name.
+2.  DNSRecon queries DNS servers to retrieve records.
+3.  It can:
+    -   Perform zone transfers.
+    -   Check for cached DNS records.
+    -   Brute-force subdomains using wordlists.
+    -   Do reverse lookups on IP ranges.
+
+------------------------------------------------------------------------
+
+4) Exact Use Case (Lab Example)
+
+Command:
+
+    dnsrecon -d example.com
+
+Flags explained: - -d → Domain name target.
+- -t std → Standard enumeration (A, MX, NS, SOA, TXT).
+- -t axfr → Test for zone transfers.
+- -t brt → Brute-force subdomains.
+
+Example Output (simplified):
+
+    [*] A Records
+    www.example.com   → 93.184.216.34  
+
+    [*] MX Records
+    mail.example.com  → 93.184.216.25  
+
+    [*] NS Records
+    ns1.example.com  
+    ns2.example.com  
+
+    [*] Zone Transfer
+    [!] Zone transfer successful: ns1.example.com
+
+------------------------------------------------------------------------
+
+5) Practical Workflow
+
+1.  Basic DNS info:
+
+    dnsrecon -d target.com -t std
+
+2.  Check zone transfer vulnerability:
+
+    dnsrecon -d target.com -t axfr
+
+3.  Subdomain brute force (with wordlist):
+
+    dnsrecon -d target.com -D wordlist.txt -t brt
+
+------------------------------------------------------------------------
+
+6) Limitations
+
+-   Results depend on target DNS configuration.
+-   Privacy-protected domains may reveal limited info.
+-   Aggressive scans (brute force) may be detected as malicious
+    activity.
+
+------------------------------------------------------------------------
+
+7) Summary
+
+-   What: DNSRecon is a DNS enumeration and testing tool.
+-   Why: To gather DNS records, find misconfigurations, and enumerate
+    subdomains.
+-   How: Queries DNS servers, tests transfers, and brute-forces
+    subdomains.
+-   Use case shown: Gathered A, MX, NS records and tested for zone
+    transfer on example.com.

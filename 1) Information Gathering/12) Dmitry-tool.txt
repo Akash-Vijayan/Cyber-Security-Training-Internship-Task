@@ -1,0 +1,87 @@
+
+⸻
+
+✅ Acknowledgement: DMitry (Deepmagic Information Gathering Tool) – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/dmitry
+
+1) What is DMitry?
+
+DMitry (Deepmagic Information Gathering Tool) is a command-line tool used for gathering information about a target host or domain. It collects useful details such as WHOIS info, subdomains, email addresses, and more.
+
+2) Why use DMitry?
+    • Quickly gathers multiple types of reconnaissance data in one tool.
+    • Useful for footprinting in cybersecurity and penetration testing.
+    • Helps identify domain registration details, name servers, and emails.
+
+3) How does DMitry work?
+    1. You provide the target domain or IP address.
+    2. DMitry runs WHOIS lookups, performs TCP port scans, and collects emails/subdomains.
+    3. Displays the gathered information in the terminal.
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context: You want to check WHOIS details for example.com using DMitry.
+
+Command:
+
+dmitry -w example.com
+
+Flags:
+    • -w → Perform WHOIS lookup (registrar info, name servers, etc.).
+    • -n → Perform Netcraft.com information search.
+    • -s → Search for subdomains.
+    • -e → Search for email addresses.
+
+Observed response (example):
+
+Domain Name: EXAMPLE.COM
+Registry Domain ID: 2336798_DOMAIN_COM-VRSN
+Registrar WHOIS Server: whois.iana.org
+Registrar URL: http://res-dom.iana.org
+Updated Date: 2023-04-01T09:30:00Z
+Creation Date: 1995-08-14T04:00:00Z
+Registry Expiry Date: 2026-08-14T04:00:00Z
+Name Server: NS1.EXAMPLE.COM
+Name Server: NS2.EXAMPLE.COM
+
+Interpretation:
+    • Registrar → The company where the domain is registered.
+    • Creation Date → When the domain was first registered.
+    • Expiry Date → When the registration will expire.
+    • Name Servers → DNS servers handling the domain.
+
+⸻
+
+5) Practical Workflow
+    1. Install DMitry (if not installed):
+
+sudo apt update
+sudo apt install dmitry
+
+    2. Run WHOIS lookup:
+
+dmitry -w example.com
+
+    3. Gather subdomains and emails:
+
+dmitry -s -e example.com
+
+⸻
+
+6) Limitations
+    • Limited to publicly available information.
+    • Cannot bypass domain privacy protection.
+    • Basic scanning, not as advanced as specialized tools like Recon-ng or Maltego.
+
+⸻
+
+7) Summary
+    • What: DMitry is an information-gathering tool for domains/hosts.
+    • Why: To collect WHOIS, subdomains, and email addresses for reconnaissance.
+    • How: Uses WHOIS, DNS queries, and email/subdomain searches.
+    • Use case shown: WHOIS lookup for example.com.
+
+⸻
