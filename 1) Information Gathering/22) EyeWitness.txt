@@ -1,0 +1,112 @@
+✅ Acknowledgement: EyeWitness – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/eyewitness
+
+⸻
+
+1) What is EyeWitness?
+EyeWitness is a reconnaissance and reporting utility in Kali Linux.
+It automates visiting web targets to take screenshots, collect server headers and metadata, and generate an organized HTML report.
+It is commonly used by penetration testers and security analysts to visually triage large numbers of web applications.
+
+⸻
+
+2) Why use EyeWitness?
+• Visual Recon → Quickly see what many domains/hosts look like without manually visiting each site.
+• Efficiency → Automates screenshots and metadata collection for large target lists.
+• Vulnerability Auditing → Helps spot default login pages, exposed admin interfaces, and misconfigurations.
+• Reporting → Produces an easy-to-share HTML report with thumbnails and details for teams or clients.
+
+⸻
+
+3) How does EyeWitness work?
+1. Input: Accepts a line-separated list of URLs, or nmap/Nessus XML.
+2. Renderer: Uses Selenium with geckodriver (Firefox) to open each page.
+3. Capture: Takes a screenshot and collects HTTP response headers and basic metadata.
+4. Report: Compiles results into an HTML report containing thumbnails, host details, and notes.
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context:
+- File: /root/urls.txt containing:
+https://www.kali.org
+https://www.kali.org/docs
+https://www.kali.org/tools
+https://www.exploit-db.com
+https://www.offsec.com
+
+Command:
+eyewitness -f /root/urls.txt -d screens --headless
+
+Flags explained:
+• -f → Input file containing URLs (line-separated).
+• -d → Directory to store screenshots and report.
+• --headless → Run browser without a visible GUI.
+
+Observed Response:
+Starting Web Requests (5 Hosts)
+Attempting to screenshot https://www.kali.org
+Attempting to screenshot https://www.kali.org/docs
+Attempting to screenshot https://www.kali.org/tools
+Attempting to screenshot https://www.exploit-db.com
+Attempting to screenshot https://www.offsec.com
+Finished in 14.1417660713 seconds
+
+[*] Done! Report written in the /usr/share/eyewitness/screens folder!
+Would you like to open the report now? [Y/n] Y
+
+Interpretation:
+EyeWitness visited each URL, captured screenshots and metadata, and saved a browsable HTML report in the specified output directory.
+
+⸻
+
+5) Practical Workflow
+
+Step 1: Install EyeWitness
+sudo apt update
+sudo apt install eyewitness
+
+Step 2: Prepare input file
+# add one URL per line
+echo "https://target.com" >> urls.txt
+
+Step 3: Run EyeWitness (headless, save to output folder)
+eyewitness -f urls.txt -d output --headless
+
+Step 4: Open report
+# open output/report.html in a browser
+
+Step 5 (Optional): Advanced usage
+• Single URL:
+eyewitness --single https://target.com -d out
+
+• Increase timeout for slow pages:
+eyewitness -f urls.txt -d out --timeout 20
+
+• Use multiple threads:
+eyewitness -f urls.txt -d out --threads 10
+
+• Show browser window for debugging:
+eyewitness -f urls.txt -d out --show-selenium
+
+• Use proxy:
+eyewitness -f urls.txt -d out --proxy-ip 127.0.0.1 --proxy-port 8080 --proxy-type socks5
+
+⸻
+
+6) Limitations
+• Resource usage: Multiple threads launch browser instances and consume significant CPU/RAM.
+• Dependency on geckodriver + Firefox: version mismatches can cause failures.
+• JavaScript-heavy pages may require increased --delay/--timeout to render properly.
+• Can trigger IDS/IPS when scanning many external hosts.
+• Not a vulnerability scanner; it provides screenshots and metadata only.
+
+⸻
+
+7) Summary
+• What: Automated web screenshot and reporting tool (Selenium + geckodriver).
+• Why: For efficient visual reconnaissance, auditing, and reporting.
+• How: Read input → Render pages → Capture screenshots and headers → Generate HTML report.
+• Use Case: Captured screenshots for a list of websites and produced a browsable report in the output folder.

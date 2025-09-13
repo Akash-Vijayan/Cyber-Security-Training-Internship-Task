@@ -1,0 +1,98 @@
+✅ Acknowledgement: Goofile – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/goofile
+
+⸻
+
+1) What is Goofile?
+Goofile is an information-gathering utility in Kali Linux that leverages web search engines to locate files of a specific filetype hosted on a target domain. 
+It automates Google-style dorking to find documents (PDFs, DOCs, XLS, etc.) and is useful for quickly discovering exposed sensitive documents or public resources within a domain.
+
+⸻
+
+2) Why use Goofile?
+• Discover Exposed Documents → Find leaked PDFs, internal docs, or configuration files indexed on the web.  
+• Recon Efficiency → Automates targeted filetype searches across a domain instead of manual search engine queries.  
+• Data Discovery → Useful for finding reports, manuals, or sensitive information during reconnaissance.  
+• Filtering by Keyword → Combine filetype search with keywords to narrow down results.
+
+⸻
+
+3) How does Goofile work?
+1. Constructs search queries (dorks) targeting a specific domain and filetype (e.g., site:example.com filetype:pdf).  
+2. Uses web search results (Google or a configured Custom Search Engine) to collect links to matching files.  
+3. Parses and lists the discovered file URLs for review or download.  
+4. Optionally accepts an API key and engine ID for authenticated/custom search access to improve reliability.
+
+Note: When no API key/engine is provided, Goofile may rely on scraping public search results which can be rate-limited or blocked.
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context:
+Search for PDF files on the domain kali.org.
+
+Command:
+goofile -d kali.org -f pdf
+
+Flags explained:
+• -d, --domain DOMAIN → Domain to search (optional but commonly used).  
+• -f, --filetype FILETYPE → Filetype to search for (required, e.g., pdf, doc, xls).  
+• -k, --key KEY → Google Custom Search API key (optional; improves reliability).  
+• -e, --engine ENGINE → Google Custom Search Engine ID (optional).  
+• -q, --query QUERY → Add keyword filter to search results.  
+• --logging LOGGING → Set logging verbosity (optional).
+
+Observed Response (example):
+Searching in kali.org for pdf
+Files found:
+docs.kali.org/pdf/kali-book-fr.pdf
+docs.kali.org/pdf/kali-book-en.pdf
+docs.kali.org/pdf/articles/kali-linux-live-usb-install-en.pdf
+...
+
+Interpretation:
+Goofile located publicly indexed PDF files hosted under kali.org and listed their paths. These can be reviewed or downloaded for reconnaissance or evidence of exposed content.
+
+⸻
+
+5) Practical Workflow
+
+Step 1: Install Goofile
+sudo apt update
+sudo apt install goofile
+
+Step 2: Run a basic domain filetype search
+goofile -d example.com -f pdf
+
+Step 3: Add keyword filtering (optional)
+goofile -d example.com -f pdf -q "password"
+
+Step 4: Use API key/engine for improved results (optional)
+# Create a Google Custom Search Engine and supply API key and engine ID
+goofile -d example.com -f pdf -k YOUR_API_KEY -e YOUR_ENGINE_ID
+
+Step 5: Review and download discovered files
+# Save output to file for later analysis
+goofile -d example.com -f pdf | tee goofile_results.txt
+
+Step 6: Analyze files
+# Download and inspect documents for sensitive info in a controlled environment.
+
+⸻
+
+6) Limitations
+• Depends on search engine results: If files are not indexed, they won't be found.  
+• Rate limiting / blocking: Scraping search results without API keys can lead to IP blocks.  
+• False positives: Some results may point to dynamic pages or redirects instead of actual files.  
+• Legal/Ethical: Downloading or using discovered files may violate privacy or terms of service—only access files you are authorized to review.  
+• Limited to filetypes: Only finds files exposed via search engines; not a replacement for direct network discovery.
+
+⸻
+
+7) Summary
+• What: Tool to search for specific filetypes hosted on a domain using search engine queries.  
+• Why: Quickly find exposed documents and sensitive files during reconnaissance.  
+• How: Generates dork-like queries (site + filetype), queries search engine (optionally via API), parses results, and lists file URLs.  
+• Use Case: Searched kali.org for PDFs and listed several pdf file paths for review.

@@ -1,0 +1,122 @@
+✅ Acknowledgement: Firewalk – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/firewalk
+
+⸻
+
+1) What is Firewalk?
+Firewalk is an active network reconnaissance utility in Kali Linux designed to determine which layer‑4 protocols (TCP/UDP ports) a packet‑filtering gateway (firewall/router) will forward to downstream networks. 
+It uses TTL‑based probing (similar to traceroute) to send packets that expire just past the gateway; responses (or lack thereof) reveal whether specific ports/protocols are allowed through the gateway's ACLs.
+
+Firewalk is primarily used during network security assessments and penetration tests to map firewall rules and find allowed traffic that may lead to further exploitation.
+
+⸻
+
+2) Why use Firewalk?
+• Firewall Rule Discovery → Identify which ports/protocols a gateway will forward to downstream hosts.  
+• Mapping Network Defenses → Understand filtering policies implemented on routers/firewalls.  
+• Pre-Attack Recon → Find permissible paths/protocols for later exploitation or service access.  
+• Verification → Check if configuration changes to ACLs are behaving as expected.
+
+⸻
+
+3) How does Firewalk work?
+1. Determines the gateway hop count using a ramping phase (like traceroute).  
+2. Sends packets with TTL set to one greater than the gateway hop so they expire past the gateway.  
+3. If intermediary gateways forward the packet, the next hop will send an ICMP_TIME_EXCEEDED message (or a TCP/UDP response), indicating the packet was forwarded.  
+4. If the gateway drops the packet (due to ACLs), there will be no response — indicating the gateway likely blocks that port/protocol.  
+5. Firewalk repeats this for specified port ranges or vectors to build a map of allowed/blocked layer‑4 traffic.
+
+Note: The destination host does not have to be reachable; it only needs to exist beyond the gateway so the forwarded packets expire at the next hop and produce responses.
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context:
+- Scanning ports 8079-8081 via interface eth0, use TCP, do not resolve hostnames.
+- Gateway (target forwarder): 192.168.1.1
+- Destination metric (downstream host used for TTL metric): 192.168.0.1
+
+Command:
+firewalk -S8079-8081 -i eth0 -n -pTCP 192.168.1.1 192.168.0.1
+
+Flags explained:
+• -Sx-y,z → Port range to scan (example: -S8079-8081).  
+• -i device → Network interface to use (example: eth0).  
+• -n → Do not resolve IP addresses to hostnames (faster/less noisy).  
+• -p TCP|UDP → Protocol to test (TCP or UDP).  
+• target_gateway → The forwarding gateway IP to test (example: 192.168.1.1).  
+• metric (destination) → A downstream IP used to set TTL so packets expire after the gateway (example: 192.168.0.1).  
+• -s → Source port (optional, for ramping).  
+• -T → Read timeout in ms.  
+• -t → IP TTL start value.  
+• -x → Expire vector (1-8).
+
+Observed Response (example):
+Firewalk 5.0 [gateway ACL scanner]
+Firewalk state initialization completed successfully.
+TCP-based scan.
+Ramping phase source port: 53, destination port: 33434
+Hotfoot through 192.168.1.1 using 192.168.0.1 as a metric.
+Ramping Phase:
+ 1 (TTL  1): expired [192.168.1.1]
+Binding host reached.
+Scan bound at 2 hops.
+Scanning Phase:
+port 8079: *no response*
+port 8080: A! open (port not listen) [192.168.0.1]
+port 8081: *no response*
+
+Scan completed successfully.
+
+Interpretation:
+- Ports with "*no response*" were likely dropped by the gateway (filtered).  
+- A response like "A! open (port not listen)" indicates the gateway forwarded the probe and the downstream host generated a response — meaning that port/protocol is allowed through the gateway.  
+- Firewalk provides totals (packets sent, ports scanned, ports open) to summarise the scan.
+
+⸻
+
+5) Practical Workflow
+
+Step 1: Install Firewalk
+sudo apt update
+sudo apt install firewalk
+
+Step 2: Choose a downstream metric host (an IP beyond the gateway)
+# Ideally a host that will exist/passively reply with ICMP TTL expired when packets expire on the downstream hop.
+
+Step 3: Run a basic scan (example)
+firewalk -S1-1024 -i eth0 -n -pTCP 192.168.1.1 192.168.0.1
+
+Step 4: Analyze results
+- Note ports that returned responses vs no responses.
+- Correlate findings with firewall ACL configurations and perform controlled follow-up testing.
+
+Step 5 (Optional): Tune scanning parameters
+• Use -T to reduce/increase packet read timeout.
+• Use -s to set source port for ramping phase.
+• Use -t and -x to adjust TTL behavior and expire vectors.
+• Limit port ranges with -S to focus on areas of interest.
+
+Step 6: Export/save output
+# Redirect output to a file for reporting
+firewalk -S8079-8081 -i eth0 -n -pTCP 192.168.1.1 192.168.0.1 | tee firewalk_output.txt
+
+⸻
+
+6) Limitations
+• Requires a downstream host beyond the gateway to produce TTL expiry responses.  
+• Heavily dependent on ICMP behavior — some networks rate-limit or block ICMP_TIME_EXCEEDED messages, reducing accuracy.  
+• Modern firewalls may implement stateful inspection that behaves differently than simple ACLs, complicating interpretation.  
+• Can be noisy — may trigger IDS/IPS or firewall logging.  
+• Not a port scanner replacement — it only determines whether traffic is forwarded by a gateway, not open services on the final host.  
+• Legal/Ethical: Only run against networks you own or have explicit permission to test.
+
+⸻
+
+7) Summary
+• What: Active TTL-based gateway ACL discovery tool to identify which layer‑4 protocols/ports are forwarded by a gateway.  
+• Why: Helps map firewall rules and discover allowed paths for later exploitation or testing.  
+• How: Ramping/TLL probing → send packets that expire past the gateway → observe responses or lack thereof to infer filtering.  
+• Use Case: Scanned ports 8079-8081 through gateway 192.168.1.1 using metric 192.168.0.1 and discovered which ports were forwarded vs filtered.

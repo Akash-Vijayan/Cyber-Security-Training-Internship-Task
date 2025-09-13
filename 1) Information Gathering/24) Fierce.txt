@@ -1,0 +1,123 @@
+✅ Acknowledgement: Fierce – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/fierce
+
+⸻
+
+1) What is Fierce?
+Fierce is a DNS reconnaissance and discovery utility included in Kali Linux.
+It is designed to locate non-contiguous IP space and hostnames associated with a target domain by using DNS queries, brute-force subdomain checks, reverse lookups, and zone-transfer attempts.
+Fierce is intended as a precursor to active scanners (nmap, nessus, nikto) to identify likely targets and expand your attack surface visibility.
+
+⸻
+
+2) Why use Fierce?
+• Discover Hidden Hosts → Find subdomains and hosts that are not obvious or documented.
+• Locate Non-Contiguous IP Space → Uncover IP ranges related to a domain, including leaked internal ranges.
+• Pre-Scan Recon → Build a list of targets for further vulnerability scanning with other tools.
+• Efficiency → Automates DNS-based discovery that would be tedious manually.
+
+⸻
+
+3) How does Fierce work?
+1. Performs a zone transfer attempt (AXFR) against the domain's authoritative DNS servers.
+2. If zone transfer fails, it performs brute-force subdomain lookups from a built-in or provided list.
+3. Conducts reverse DNS lookups on discovered IPs to find related hostnames and ranges.
+4. Optionally traverses nearby IP ranges or expands to full /24s to discover additional assets.
+
+It relies heavily on DNS data and DNS server behavior to reveal internal or external hosts.
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context:
+Target domain: example.com
+
+Command:
+fierce --domain example.com
+
+Flags explained:
+• --domain DOMAIN → Domain to test (required in most use cases).
+• --connect → Attempt HTTP connection to non-RFC1918 (public) hosts discovered.
+• --wide → Scan the entire class C of discovered records (expand sweep).
+• --traverse TRAVERSE → Scan IPs near discovered records (limited neighbor scan).
+• --search SEARCH [SEARCH ...] → Filter on these domains when expanding lookup.
+• --range RANGE → Scan an internal IP range (CIDR notation).
+• --delay DELAY → Time to wait between lookups (seconds).
+• --subdomains SUBDOMAINS [SUBDOMAINS ...] → Supply specific subdomains to test.
+• --subdomain-file SUBDOMAIN_FILE → Use a file containing subdomains (one per line).
+• --dns-servers DNS_SERVERS [DNS_SERVERS ...] → Use specific DNS servers for reverse lookups.
+• --dns-file DNS_FILE → Use a file of DNS servers for reverse lookups.
+• --tcp → Use TCP instead of UDP for DNS queries.
+
+Observed Response (example):
+DNS Servers for example.com:
+    ns1.example.com
+    ns2.example.com
+
+Trying zone transfer first...
+    Testing ns1.example.com
+        Request timed out or transfer not allowed.
+    Testing ns2.example.com
+        Request timed out or transfer not allowed.
+
+Unsuccessful in zone transfer (it was worth a shot)
+Okay, trying the good old fashioned way... brute force
+
+Checking for wildcard DNS...
+Nope. Good.
+Now performing 2280 test(s)...
+
+Interpretation:
+Fierce attempted a zone transfer (AXFR). When that failed, it proceeded to brute-force lookups and reverse DNS probing to discover hosts and IP ranges associated with the domain. The output lists discovered hosts, IPs, and any candidate networks for further scanning.
+
+⸻
+
+5) Practical Workflow
+
+Step 1: Install Fierce
+sudo apt update
+sudo apt install fierce
+
+Step 2: Prepare optional lists (subdomains or DNS servers)
+# Create a subdomain wordlist (one per line)
+echo "admin" >> subdomains.txt
+echo "dev" >> subdomains.txt
+
+Step 3: Run a basic scan
+fierce --domain example.com
+
+Step 4: Run with a subdomain file and expand sweep
+fierce --domain example.com --subdomain-file subdomains.txt --wide
+
+Step 5: Use traverse or range scanning for neighboring IP space
+fierce --domain example.com --traverse 5
+# or
+fierce --domain example.com --range 10.0.0.0/24
+
+Step 6: (Optional) Attempt HTTP connection for discovered public hosts
+fierce --domain example.com --connect
+
+Step 7: Review output and feed results to active scanners (nmap, nikto)
+# Example: save hosts to file and run nmap
+fierce --domain example.com | tee fierce_output.txt
+# parse IPs and run nmap (example)
+nmap -sV -p- -iL discovered_hosts.txt
+
+⸻
+
+6) Limitations
+• DNS-dependent: If DNS records are limited or protected, Fierce may not find much.
+• False Positives: Wildcard DNS and CDN providers can yield misleading results.
+• Partial Coverage: Does not perform port/service scanning — it's a discovery tool only.
+• Potentially Noisy: Performing large brute-force lookups can trigger monitoring or rate-limits on DNS servers.
+• Legal/Ethical: Scanning domains you don't own or lack permission for may be illegal or against terms of service.
+
+⸻
+
+7) Summary
+• What: DNS reconnaissance tool to locate hosts and non-contiguous IP space for a domain.
+• Why: Helps expand attack surface knowledge and prepare targets for deeper scanning.
+• How: Attempts zone transfer → brute-force subdomain lookups → reverse DNS probing → optional traversal/expansion.
+• Use Case: Ran against example.com to attempt zone transfer and then brute-force lookups to discover hostnames and IP ranges.

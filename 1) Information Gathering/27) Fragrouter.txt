@@ -1,0 +1,106 @@
+✅ Acknowledgement: Fragrouter – Kali Linux
+
+🔗 Official tool page: https://www.kali.org/tools/fragrouter
+
+⸻
+
+1) What is Fragrouter?
+Fragrouter is a network intrusion detection evasion toolkit included in Kali Linux.
+It manipulates IP and TCP fragmentation, ordering, duplication, and other packet-level behaviors to test how network devices (IDS/IPS, firewalls, reassembly engines) handle malformed or crafted traffic.
+Security analysts and penetration testers use Fragrouter to simulate evasion techniques and discover weaknesses in network monitoring and packet reassembly implementations.
+
+⸻
+
+2) Why use Fragrouter?
+• IDS/IPS Evasion Testing → Determine if intrusion detection systems can detect and reassemble suspicious fragments.  
+• Reassembly Testing → Validate how devices reconstruct fragmented packets and whether that behavior causes false negatives.  
+• Defensive Hardening → Identify gaps in network monitors and tune signatures or reassembly settings.  
+• Research & Education → Study historical fragmentation attacks and protocol edge-cases in controlled lab environments.
+
+⸻
+
+3) How does Fragrouter work?
+1. Sends crafted packets using different fragmentation, ordering, duplication, and TCP segment techniques.  
+2. Modifies IP fragment sizes (e.g., 8-byte, 24-byte fragments), reorders fragments, duplicates fragments, or marks the last fragment first.  
+3. Sends TCP-specific manipulations including small ordered segments, duplicate segments, bad checksums, interleaved SYNs, etc.  
+4. Observes whether intermediate devices (IDS/IPS, firewalls) or the destination host accept, drop, or misinterpret the traffic.  
+5. Reports on observable behaviors, allowing analysts to infer how well monitoring stacks handle these evasion techniques.
+
+Fragrouter provides multiple attack modes (e.g., F1..F7 for fragment attacks, T1..T9/C2..C3 for TCP-based attacks, M1..M2 for misc historical attacks).
+
+⸻
+
+4) Exact Use Case (Lab Example)
+
+Context:
+- Interface to use: eth0
+- Attack: ordered 8-byte IP fragments (F1)
+
+Command:
+fragrouter -i eth0 -F1
+
+Flags explained:
+• -i interface → Network interface to send packets from (example: eth0).  
+• -F1, -F2 ... -F7 → Fragmentation attacks (different sizes, ordering, duplication).  
+• -T* / -t* / -C* → TCP-based attacks (small segments, duplicates, bad checksums, etc.).  
+• -B1 → Base (normal IP forwarding) for control comparisons.  
+• -p, -g, -G → Additional options for packet/gateway manipulation (refer to help output).  
+
+Observed Response (example):
+fragrouter: frag-1: ordered 8-byte IP fragments
+
+Interpretation:
+Fragrouter began sending the specified crafted fragments (F1). Analysts should monitor IDS/IPS logs and destination host behavior to determine if the traffic was detected, dropped, or reassembled incorrectly. Compare against baseline behavior (e.g., B1 normal forwarding) to evaluate evasions.
+
+⸻
+
+5) Practical Workflow
+
+Step 1: Install Fragrouter
+sudo apt update
+sudo apt install fragrouter
+
+Step 2: Choose a controlled lab environment
+# Use a lab network or virtual topology to avoid legal/ethical issues.
+
+Step 3: Run a baseline test (normal forwarding)
+fragrouter -i eth0 -B1
+
+Step 4: Run specific evasion tests
+# Example: ordered 8-byte fragments
+fragrouter -i eth0 -F1
+
+# Example: ordered 24-byte fragments
+fragrouter -i eth0 -F2
+
+# Example: TCP small ordered 1-byte segments with bad checksum
+fragrouter -i eth0 -T1
+
+Step 5: Monitor detection systems and target host
+# Collect IDS/IPS logs, packet captures (tcpdump), and host-side logs for comparison.
+sudo tcpdump -i eth0 -w frag_test.pcap
+
+Step 6: Analyze results
+# Compare baseline vs evasive attacks: check what alerts fired, which packets were missed, and how the destination reassembled traffic.
+
+Step 7: Document findings and recommend tuning
+# Suggest signature adjustments, reassembly configuration changes, or network hardening based on observed gaps.
+
+⸻
+
+6) Limitations
+• Potentially disruptive: Fragrouter sends malformed/odd traffic that can destabilize services or network devices — use only in controlled environments.  
+• Detection risk: Highly noisy and easily logged; running it in production without permission can trigger alarms or cause legal issues.  
+• Limited automation: Primarily a manual testing tool; interpreting results requires packet captures and IDS logs.  
+• Legacy focus: Some attack modes (M1/M2) target historical vulnerabilities and may be less relevant against modern systems, but still useful for research.  
+• Requires deep protocol knowledge to interpret results correctly.
+
+Legal/Ethical: Only run Fragrouter on networks and hosts you own or have explicit permission to test.
+
+⸻
+
+7) Summary
+• What: Packet fragmentation and TCP-segmentation evasion toolkit to test IDS/IPS and reassembly behavior.  
+• Why: To evaluate whether network monitoring and packet-filtering devices correctly detect and reassemble crafted/malformed traffic.  
+• How: Send crafted fragment/TCP sequences (various modes like F1..F7, T1..T9, etc.), capture traffic and logs, and analyze discrepancies vs baseline.  
+• Use Case: Sent ordered 8-byte IP fragments using interface eth0 (fragrouter -i eth0 -F1) and monitored for detection and reassembly behavior.
